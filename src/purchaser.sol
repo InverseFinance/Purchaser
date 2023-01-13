@@ -82,7 +82,7 @@ contract Purchaser {
         INV.transfer(msg.sender, bonusAccrued);
     }
 
-    function getInvPrice() internal view returns(uint){
+    function getInvPrice() public view returns(uint){
         (,uint256[] memory balances,) = vault.getPoolTokens(poolId);
         return balances[1] * 10**18 / balances[0];
     }
