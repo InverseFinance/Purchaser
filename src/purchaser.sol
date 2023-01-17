@@ -53,7 +53,7 @@ contract Purchaser {
         require(startTime != 0 && runTime != 0, "NOT INITIALIZED");
         require(block.timestamp > startTime && block.timestamp < startTime + runTime, "OUT OF BUY PERIOD");
         require(limitAvailable() >= amount, "BUY EXCEED LIMIT");
-        if(lastBuy > lastReset()){
+        if(lastBuy >= lastReset()){
             dailyBuy += amount;
         } else {
             dailyBuy = amount;
