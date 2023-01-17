@@ -137,5 +137,20 @@ contract PurchaserTest is DSTest{
         purchaser.buy(1000 ether, invPrice);
         vm.stopPrank();
     }
+
+    function test_sweep_successful() public {
+        uint purchaserInvBalance = INV.balanceOf(address(purchaser));
+        uint govInvBefore = INV.balanceOf(gov);
+        vm.prank(gov);
+        purchaser.sweep(address(INV));
+        assertEq(INV.balanceOf(address(purchaser)), 0);
+        assertEq(INV.balanceOf(gov), govInvBefore + purchaserInvBalance);
+    }
+
+    function test_sweepByHacker_reverts() public {
+        vm.prank(hacker);
+        vm.expectRevert("ONLY GOV");
+        purchaser.sweep(address(INV));
+    }
 }
 
