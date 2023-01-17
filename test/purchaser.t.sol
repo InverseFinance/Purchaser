@@ -47,7 +47,7 @@ contract PurchaserTest is DSTest{
         vm.stopPrank(); 
 
         assertEq(USDC.balanceOf(gov), govUsdcBefore + purchaseAmount, "Gov didn't receive the right amount of USDC");
-        uint invToReceive = purchaseAmount * 10**12 * 10**18 / purchaser.getInvPrice();
+        uint invToReceive = purchaseAmount * 10**18 / purchaser.getInvPrice();
         invToReceive += invToReceive * purchaser.bonusBps() / 10_000;
         assertEq(INV.balanceOf(buyer), buyerInvBefore + invToReceive, "Buyer didn't receive right amount of INV");
         assertEq(purchaser.limitAvailable(), dailyLimit - purchaseAmount, "Daily limit did not decrease properly");
@@ -73,7 +73,7 @@ contract PurchaserTest is DSTest{
         vm.stopPrank(); 
 
         assertEq(USDC.balanceOf(gov), govUsdcBefore + purchaseAmount * 2, "Gov didn't receive the right amount of USDC");
-        uint invToReceive = purchaseAmount * 10**12 * 10**18 / purchaser.getInvPrice();
+        uint invToReceive = purchaseAmount * 10**18 / purchaser.getInvPrice();
         invToReceive += invToReceive * purchaser.bonusBps() / 10_000;
         assertEq(INV.balanceOf(buyer), buyerInvBefore + invToReceive * 2, "Buyer didn't receive right amount of INV");
         assertEq(purchaser.limitAvailable(), 0, "Daily limit did not decrease properly");
