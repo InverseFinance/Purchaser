@@ -76,7 +76,7 @@ contract Purchaser {
 
     function getInvPrice() public view returns(uint){
         (,uint256[] memory balances,) = vault.getPoolTokens(poolId);
-        return balances[1] * 10**18 / balances[0] / 10**12;
+        return balances[1] * 10**6 / balances[0];
     }
 
     function lastReset() public view returns(uint){
