@@ -71,7 +71,7 @@ contract Purchaser {
         invToReceive += invToReceive * bonusBps / 10000;
 
         INV.transfer(msg.sender, invToReceive);
-        emit Buy(block.timestamp, amount, invToReceive, msg.sender);
+        emit Buy(amount, invToReceive, msg.sender);
     }
 
     function getInvPrice() public view returns(uint){
@@ -126,5 +126,5 @@ contract Purchaser {
         runTime += additionalTime;       
     }
 
-    event Buy(uint timestamp, uint usdcAmount, uint invAmount, address purchaser);
+    event Buy(uint usdcAmount, uint invAmount, address purchaser);
 }
