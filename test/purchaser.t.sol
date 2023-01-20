@@ -21,7 +21,7 @@ contract PurchaserTest is DSTest{
     function setUp() public{
         purchaser = new Purchaser();
         vm.prank(gov);
-        purchaser.toggleWhitelist(buyer);
+        purchaser.allowWhitelist(buyer, true);
         vm.prank(usdcHolder);
         USDC.transfer(buyer, 1000_000 * 10**6);
         vm.prank(buyer);

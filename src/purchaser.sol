@@ -104,8 +104,8 @@ contract Purchaser {
         minInvPrice = _minInvPrice;
     }
 
-    function toggleWhitelist(address buyer) external onlyGov {
-        whitelist[buyer] = !whitelist[buyer];
+    function allowWhitelist(address buyer, bool allowed) external onlyGov {
+        whitelist[buyer] = allowed;
     }
 
     function sweep(address token) external onlyGov {
