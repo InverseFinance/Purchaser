@@ -31,7 +31,7 @@ contract Purchaser {
     uint public lifetimeLimit;
     uint public lifetimeBuy;
     uint public minInvPrice;
-    uint public bonusBps;
+    uint public discountBps;
 
     address public constant gov = 0x926dF14a23BE491164dCF93f4c468A50ef659D5B;
     address public minPriceGuardian = 0xE3eD95e130ad9E15643f5A5f232a3daE980784cd;
@@ -67,8 +67,8 @@ contract Purchaser {
         require(invPrice >= minInvPrice, "INV PRICE TOO LOW");
         require(invPrice <= maxInvPrice, "INV PRICE TOO HIGH");
 
-        uint invToReceive = amount * 10**18 / invPrice; //Amount is multiplied by 10**6 to account for invPrice decimal precision and 10**12 to account for difference in decimals between USDC and INV
-        invToReceive += invToReceive * bonusBps / 10000;
+        uint discountedInvPrice = invPrice * (10000 - discountBps) / 10000;
+        uint invToReceive = amount * 10**18 / discountedInvPrice; //Amount is multiplied by 10**6 to account for invPrice decimal precision and 10**12 to account for difference in decimals between USDC and INV
 
         INV.transfer(msg.sender, invToReceive);
         emit Buy(amount, invToReceive, msg.sender);
@@ -93,14 +93,14 @@ contract Purchaser {
     /****************** ADMIN FUNCTIONS ************************/
     /***********************************************************/
 
-    function init(uint _startTime, uint _runTime, uint _dailyLimit, uint _lifetimeLimit, uint _bonusBps, uint _minInvPrice) external onlyGov{
+    function init(uint _startTime, uint _runTime, uint _dailyLimit, uint _lifetimeLimit, uint _discountBps, uint _minInvPrice) external onlyGov{
         require(startTime == 0 && runTime == 0, "ALREADY INITIALIZED");
-        require(_bonusBps <= 10000);
+        require(_discountBps <= 10000);
         startTime = _startTime;
         runTime = _runTime;
         dailyLimit = _dailyLimit;
         lifetimeLimit = _lifetimeLimit;
-        bonusBps = _bonusBps;
+        discountBps = _discountBps;
         minInvPrice = _minInvPrice;
     }
 

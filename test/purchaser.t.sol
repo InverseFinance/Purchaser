@@ -35,9 +35,9 @@ contract PurchaserTest is DSTest{
         uint purchaseAmount = 5_000 * 10**6;
         uint dailyLimit = 10_000 * 10**6;
         uint totalLimit = 1000_000 * 10**6;
-        uint bonusBps = 1500;
+        uint discountBps = 1500;
         vm.prank(gov);
-        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, bonusBps, invPrice / 2);
+        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, discountBps, invPrice / 2);
         uint buyerInvBefore = INV.balanceOf(buyer);
         uint govUsdcBefore = USDC.balanceOf(gov);
         uint lifetimeBuyBefore = purchaser.lifetimeBuy();
@@ -47,8 +47,7 @@ contract PurchaserTest is DSTest{
         vm.stopPrank(); 
 
         assertEq(USDC.balanceOf(gov), govUsdcBefore + purchaseAmount, "Gov didn't receive the right amount of USDC");
-        uint invToReceive = purchaseAmount * 10**18 / purchaser.getInvPrice();
-        invToReceive += invToReceive * purchaser.bonusBps() / 10_000;
+        uint invToReceive = purchaseAmount * 10**18 / (purchaser.getInvPrice() * 85 / 100);
         assertEq(INV.balanceOf(buyer), buyerInvBefore + invToReceive, "Buyer didn't receive right amount of INV");
         assertEq(purchaser.limitAvailable(), dailyLimit - purchaseAmount, "Daily limit did not decrease properly");
         assertEq(purchaser.lifetimeBuy(), lifetimeBuyBefore + purchaseAmount, "Total bought did not increase properly");
@@ -59,9 +58,9 @@ contract PurchaserTest is DSTest{
         uint dailyLimit = 10_000 * 10**6;
         uint purchaseAmount = dailyLimit;
         uint totalLimit = 1000_000 * 10**6;
-        uint bonusBps = 1500;
+        uint discountBps = 1500;
         vm.prank(gov);
-        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, bonusBps, invPrice / 2);
+        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, discountBps, invPrice / 2);
         uint buyerInvBefore = INV.balanceOf(buyer);
         uint govUsdcBefore = USDC.balanceOf(gov);
         uint lifetimeBuyBefore = purchaser.lifetimeBuy();
@@ -73,8 +72,7 @@ contract PurchaserTest is DSTest{
         vm.stopPrank(); 
 
         assertEq(USDC.balanceOf(gov), govUsdcBefore + purchaseAmount * 2, "Gov didn't receive the right amount of USDC");
-        uint invToReceive = purchaseAmount * 10**18 / purchaser.getInvPrice();
-        invToReceive += invToReceive * purchaser.bonusBps() / 10_000;
+        uint invToReceive = purchaseAmount * 10**18 / (purchaser.getInvPrice() * 85 / 100);
         assertEq(INV.balanceOf(buyer), buyerInvBefore + invToReceive * 2, "Buyer didn't receive right amount of INV");
         assertEq(purchaser.limitAvailable(), 0, "Daily limit did not decrease properly");
         assertEq(purchaser.lifetimeBuy(), lifetimeBuyBefore + purchaseAmount * 2, "Total bought did not increase properly");
