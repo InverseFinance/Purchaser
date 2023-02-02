@@ -37,7 +37,7 @@ contract PurchaserTest is DSTest{
         uint totalLimit = 1000_000 * 10**6;
         uint discountBps = 1500;
         vm.prank(gov);
-        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, discountBps, invPrice / 2);
+        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, discountBps, invPrice / 2, address(0));
         uint buyerInvBefore = INV.balanceOf(buyer);
         uint govUsdcBefore = USDC.balanceOf(gov);
         uint lifetimeBuyBefore = purchaser.lifetimeBuy();
@@ -60,7 +60,7 @@ contract PurchaserTest is DSTest{
         uint totalLimit = 1000_000 * 10**6;
         uint discountBps = 1500;
         vm.prank(gov);
-        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, discountBps, invPrice / 2);
+        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, discountBps, invPrice / 2, address(0));
         uint buyerInvBefore = INV.balanceOf(buyer);
         uint govUsdcBefore = USDC.balanceOf(gov);
         uint lifetimeBuyBefore = purchaser.lifetimeBuy();
@@ -78,20 +78,43 @@ contract PurchaserTest is DSTest{
         assertEq(purchaser.lifetimeBuy(), lifetimeBuyBefore + purchaseAmount * 2, "Total bought did not increase properly");
     }
 
-    function test_buyExeedDailyLimit_reverts() public {
+    function test_initFromOtherPurchaser_succeed() public {
+        uint invPrice = purchaser.getInvPrice();
+        uint purchaseAmount = 5_000 * 10**6;
+        uint dailyLimit = 10_000 * 10**6;
+        uint totalLimit = 1000_000 * 10**6;
+        uint discountBps = 1500;
+        vm.prank(gov);
+        purchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, discountBps, invPrice / 2, address(0));
+
+        vm.startPrank(buyer);
+        purchaser.buy(purchaseAmount, invPrice);
+        vm.stopPrank(); 
+
+        Purchaser newPurchaser = new Purchaser();
+        vm.prank(buyer);
+        USDC.approve(address(newPurchaser), type(uint).max);
+        vm.prank(gov);
+        newPurchaser.init(block.timestamp-1, 10 days, dailyLimit, totalLimit, discountBps, invPrice / 2, address(purchaser));
+
+        assertEq(purchaser.lifetimeBuy(), newPurchaser.lifetimeBuy(), "Lifetime buy is not the same");
+        assertEq(purchaser.dailyBuy(), newPurchaser.dailyBuy(), "Daily buy is not the same");
+    }
+
+    function test_buyExceedDailyLimit_reverts() public {
         uint invPrice = purchaser.getInvPrice();
         vm.prank(gov);
-        purchaser.init(block.timestamp-1, 10 days, 10_000 ether, 1000_000 ether, 1500, invPrice / 2);
+        purchaser.init(block.timestamp-1, 10 days, 10_000 ether, 1000_000 ether, 1500, invPrice / 2, address(0));
         vm.expectRevert("BUY EXCEED LIMIT");
         vm.startPrank(buyer);
         purchaser.buy(10_001 ether, invPrice);
         vm.stopPrank();   
     }
 
-    function test_buyExeedTotalLimit_reverts() public {
+    function test_buyExceedTotalLimit_reverts() public {
         uint invPrice = purchaser.getInvPrice();
         vm.prank(gov);
-        purchaser.init(block.timestamp-1, 10 days, 20_000 ether, 10_000 ether, 1500, invPrice / 2);
+        purchaser.init(block.timestamp-1, 10 days, 20_000 ether, 10_000 ether, 1500, invPrice / 2, address(0));
         vm.expectRevert("BUY EXCEED LIMIT");
         vm.startPrank(buyer);
         purchaser.buy(10_001 ether, invPrice);
@@ -101,7 +124,7 @@ contract PurchaserTest is DSTest{
     function test_buyFromNonWhitelist_reverts() public {
         uint invPrice = purchaser.getInvPrice();
         vm.prank(gov);
-        purchaser.init(block.timestamp, 10 days, 10_000 ether, 1000_000 ether, 1500, invPrice / 2);
+        purchaser.init(block.timestamp, 10 days, 10_000 ether, 1000_000 ether, 1500, invPrice / 2, address(0));
         vm.expectRevert("ONLY WHITELIST");
         vm.startPrank(hacker);
         purchaser.buy(1000 ether, invPrice);
@@ -119,7 +142,7 @@ contract PurchaserTest is DSTest{
     function test_buyBeforeStart_reverts() public {
         uint invPrice = purchaser.getInvPrice();
         vm.prank(gov);
-        purchaser.init(block.timestamp+1, 10 days, 10_000 ether, 1000_000 ether, 1500, invPrice / 2);
+        purchaser.init(block.timestamp+1, 10 days, 10_000 ether, 1000_000 ether, 1500, invPrice / 2, address(0));
         vm.expectRevert("OUT OF BUY PERIOD");
         vm.startPrank(buyer);
         purchaser.buy(1000 ether, invPrice);
@@ -129,7 +152,7 @@ contract PurchaserTest is DSTest{
     function test_buyAfterEnd_reverts() public {
         uint invPrice = purchaser.getInvPrice();
         vm.prank(gov);
-        purchaser.init(block.timestamp - 11 days, 10 days, 10_000 ether, 1000_000 ether, 1500, invPrice / 2);
+        purchaser.init(block.timestamp - 11 days, 10 days, 10_000 ether, 1000_000 ether, 1500, invPrice / 2, address(0));
         vm.expectRevert("OUT OF BUY PERIOD");
         vm.startPrank(buyer);
         purchaser.buy(1000 ether, invPrice);

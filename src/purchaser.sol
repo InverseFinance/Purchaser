@@ -93,7 +93,7 @@ contract Purchaser {
     /****************** ADMIN FUNCTIONS ************************/
     /***********************************************************/
 
-    function init(uint _startTime, uint _runTime, uint _dailyLimit, uint _lifetimeLimit, uint _discountBps, uint _minInvPrice) external onlyGov{
+    function init(uint _startTime, uint _runTime, uint _dailyLimit, uint _lifetimeLimit, uint _discountBps, uint _minInvPrice, address upgradeFrom) external onlyGov{
         require(startTime == 0 && runTime == 0, "ALREADY INITIALIZED");
         require(_discountBps <= 10000);
         startTime = _startTime;
@@ -102,6 +102,13 @@ contract Purchaser {
         lifetimeLimit = _lifetimeLimit;
         discountBps = _discountBps;
         minInvPrice = _minInvPrice;
+        //If the upgradeFrom address is non-zero, take the dailyBuy and lifetimeBuy values from the old purchaser
+        if(upgradeFrom != address(0)){
+            Purchaser oldPurchaser = Purchaser(upgradeFrom);
+            require(oldPurchaser.lifetimeBuy() <= lifetimeLimit);
+            lifetimeBuy = oldPurchaser.lifetimeBuy();
+            dailyBuy = oldPurchaser.dailyBuy();
+        }
     }
 
     function allowWhitelist(address buyer, bool allowed) external onlyGov {
