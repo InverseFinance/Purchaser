@@ -48,7 +48,7 @@ contract ReusableOTC {
         require(IERC20(token).balanceOf(owner) == balBefore + tokenAmount);
 
         emit Buy(msg.sender, token, tokenAmount, invAmount);
-        //Delete struct to protet against multiple buys
+        //Delete struct to protect against multiple buys
         delete deals[msg.sender];
     }
 
