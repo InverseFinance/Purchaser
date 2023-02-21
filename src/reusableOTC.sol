@@ -16,10 +16,12 @@ contract ReusableOTC {
 
     IERC20 constant INV = IERC20(0x41D5D79431A913C4aE7d69a668ecdfE5fF9DFB68);
     address owner;
+    address treasury;
     mapping(address => Deal) deals;
 
-    constructor(address _owner){
+    constructor(address _owner, address _treasury){
         owner = _owner;
+        treasury = _treasury;
     }
 
     modifier onlyOwner(){
@@ -39,13 +41,13 @@ contract ReusableOTC {
         require(deal.tokenAmount == tokenAmount, "tokenAmount mismatch");
         require(deal.invAmount == invAmount, "invAmount mismatch");
 
-        uint balBefore = IERC20(token).balanceOf(owner);
-        IERC20(token).transferFrom(msg.sender, owner, tokenAmount);
-        INV.transferFrom(owner, msg.sender, invAmount);
+        uint balBefore = IERC20(token).balanceOf(treasury);
+        IERC20(token).transferFrom(msg.sender, treasury, tokenAmount);
+        INV.transferFrom(treasury, msg.sender, invAmount);
         
         //Check that our token balance increase by expected amount, just in case the buyer token doesn't fail on insufficient approval
         //No need to check this with INV, as INV will fail
-        require(IERC20(token).balanceOf(owner) == balBefore + tokenAmount);
+        require(IERC20(token).balanceOf(treasury) == balBefore + tokenAmount);
 
         emit Buy(msg.sender, token, tokenAmount, invAmount);
         //Delete struct to protect against multiple buys
