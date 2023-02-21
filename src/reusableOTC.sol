@@ -23,7 +23,7 @@ contract ReusableOTC {
     }
 
     modifier onlyOwner(){
-        require(msg.sender == owner);
+        require(msg.sender == owner, "only owner");
         _;
     }
 
@@ -34,10 +34,10 @@ contract ReusableOTC {
 
     function buy(address token, uint tokenAmount, uint invAmount) external {
         Deal memory deal = deals[msg.sender];
-        require(block.timestamp <= deal.deadline);
-        require(deal.token == token);
-        require(deal.tokenAmount == tokenAmount);
-        require(deal.invAmount == invAmount);
+        require(block.timestamp <= deal.deadline, "Deadline exceeded");
+        require(deal.token == token, "Token mismatch");
+        require(deal.tokenAmount == tokenAmount, "tokenAmount mismatch");
+        require(deal.invAmount == invAmount, "invAmount mismatch");
 
         uint balBefore = IERC20(token).balanceOf(owner);
         IERC20(token).transferFrom(msg.sender, owner, tokenAmount);
