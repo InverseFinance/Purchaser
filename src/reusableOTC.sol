@@ -27,7 +27,7 @@ contract ReusableOTC {
         _;
     }
 
-    function createDeal(address buyer, address token, uint tokenAmount, uint invAmount, uint deadline) external onlyOwner {
+    function setDeal(address buyer, address token, uint tokenAmount, uint invAmount, uint deadline) external onlyOwner {
         require(block.timestamp < deadline);
         deals[buyer] = Deal(token, tokenAmount, invAmount, deadline);
     }
@@ -64,5 +64,5 @@ contract ReusableOTC {
         owner = newOwner;
     }
 
-    event Buy(address buyer, address token, uint tokenAmount, uint invAmount);
+    event Buy(address indexed buyer, address indexed token, uint tokenAmount, uint invAmount);
 }
